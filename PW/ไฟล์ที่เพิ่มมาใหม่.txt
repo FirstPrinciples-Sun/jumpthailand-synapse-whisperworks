@@ -1,0 +1,5 @@
+ไฟล์ที่เพิ่มมาใหม่
+    MainViewModel.kt
+    MainViewModel.kt(WearOS)
+    WhisperWorksApplication.kt
+    
