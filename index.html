@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whisper Works - Core Tech Demo</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* 1. Visual Design & Identity */
+        body {
+            background-color: #000033; /* Deep navy blue */
+            color: #F0F0F0; /* Off-white */
+            font-family: 'Kanit', sans-serif;
+        }
+
+        .accent-color { color: #00FF85; }
+        .bg-accent-color { background-color: #00FF85; }
+        .border-accent-color { border-color: #00FF85; }
+
+        /* Pulsing animation for microphone */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 255, 133, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 20px 10px rgba(0, 255, 133, 0);
+            }
+        }
+
+        .recording {
+            animation: pulse 2s infinite;
+        }
+
+        /* Custom styles for premium feel */
+        .card {
+            background-color: rgba(10, 10, 50, 0.5);
+            border: 1px solid rgba(0, 255, 133, 0.2);
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        textarea, select {
+            background-color: rgba(0, 0, 20, 0.7);
+            border: 1px solid rgba(0, 255, 133, 0.3);
+        }
+
+        .btn {
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 133, 0.2);
+        }
+
+        .keyword-tag {
+            background-color: rgba(0, 255, 133, 0.1);
+            border: 1px solid rgba(0, 255, 133, 0.5);
+            color: #00FF85;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            margin: 0.25rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl mx-auto space-y-8">
+        <header class="text-center">
+            <h1 class="text-4xl font-bold">Whisper Works</h1>
+            <p class="text-lg accent-color">Core Tech Demo</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Speech-to-Text (STT) Section -->
+            <div class="card space-y-4">
+                <h2 class="text-2xl font-semibold border-b-2 border-accent-color pb-2">Speech-to-Text</h2>
+                <div class="flex items-center space-x-2">
+                    <label for="stt-lang" class="text-sm">Language:</label>
+                    <select id="stt-lang" class="p-1 rounded w-full">
+                        <option value="th-TH" selected>ภาษาไทย</option>
+                        <option value="en-US">English</option>
+                    </select>
+                </div>
+                <div class="text-center">
+                    <button id="mic-btn" class="bg-accent-color text-[#000033] p-4 rounded-full btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm5 10.5a.5.5 0 01.5.5v.5a.5.5 0 01-1 0v-.5a.5.5 0 01.5-.5zM8 15a.5.5 0 00-.5-.5h-.5a.5.5 0 000 1h.5a.5.5 0 00.5-.5zM7 11a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1zm-2 4a1 1 0 011-1h.5a.5.5 0 010 1H6a1 1 0 01-1-1zm7.5.5a.5.5 0 00.5-.5v-.5a.5.5 0 00-1 0v.5a.5.5 0 00.5.5zM4 11a1 1 0 100 2h.5a.5.5 0 000-1H4z" clip-rule="evenodd" />
+                            <path d="M3 8a4 4 0 014-4h6a4 4 0 014 4v4a4 4 0 01-4 4h-1.586A2 2 0 0014 14.414V15a1 1 0 11-2 0v-.586A2 2 0 0010.414 13H9.586A2 2 0 008 14.414V15a1 1 0 11-2 0v-.586A2 2 0 004.414 13H4a4 4 0 01-4-4v-1z" />
+                        </svg>
+                    </button>
+                    <p id="stt-status" class="mt-2 text-sm h-4">กดปุ่มเพื่อเริ่มพูด</p>
+                </div>
+                <textarea id="stt-output" rows="5" class="w-full p-2 rounded" placeholder="ข้อความที่ถอดเสียงจะปรากฏที่นี่..."></textarea>
+                <button id="send-to-summarizer-btn" class="w-full bg-gray-600 text-white py-2 rounded btn" disabled>Send to Summarizer</button>
+            </div>
+
+            <!-- Text-to-Speech (TTS) & Summarizer -->
+            <div class="space-y-8">
+                <!-- TTS Section -->
+                <div class="card space-y-4">
+                    <h2 class="text-2xl font-semibold border-b-2 border-accent-color pb-2">Text-to-Speech</h2>
+                    <div class="flex items-center space-x-2">
+                        <label for="tts-lang" class="text-sm">Language:</label>
+                        <select id="tts-lang" class="p-1 rounded w-full">
+                            <option value="th-TH" selected>ภาษาไทย</option>
+                            <option value="en-US">English</option>
+                        </select>
+                    </div>
+                    <textarea id="tts-input" rows="3" class="w-full p-2 rounded" placeholder="ป้อนข้อความที่นี่..."></textarea>
+                    <button id="speak-btn" class="w-full bg-accent-color text-[#000033] py-2 rounded btn font-semibold">Speak</button>
+                </div>
+
+                <!-- AI Summarizer Section -->
+                <div class="card space-y-4">
+                    <h2 class="text-2xl font-semibold border-b-2 border-accent-color pb-2">AI Summarizer</h2>
+                    <textarea id="summarizer-input" rows="5" class="w-full p-2 rounded" placeholder="ข้อความสำหรับสรุป..."></textarea>
+                    <button id="summarize-btn" class="w-full bg-accent-color text-[#000033] py-2 rounded btn font-semibold">
+                        <span id="summarize-btn-text">Summarize</span>
+                        <span id="summarize-loader" class="hidden">Processing...</span>
+                    </button>
+                    <div class="pt-2">
+                        <h3 class="font-semibold">Keywords:</h3>
+                        <div id="summarizer-output" class="flex flex-wrap gap-2 mt-2 min-h-[40px]">
+                            <!-- Keyword tags will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // 3. Technical Requirements: Vanilla JavaScript
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Element References ---
+        const micBtn = document.getElementById('mic-btn');
+        const sttStatus = document.getElementById('stt-status');
+        const sttOutput = document.getElementById('stt-output');
+        const sendToSummarizerBtn = document.getElementById('send-to-summarizer-btn');
+        const sttLangSelect = document.getElementById('stt-lang');
+
+        const ttsInput = document.getElementById('tts-input');
+        const speakBtn = document.getElementById('speak-btn');
+        const ttsLangSelect = document.getElementById('tts-lang');
+
+        const summarizerInput = document.getElementById('summarizer-input');
+        const summarizeBtn = document.getElementById('summarize-btn');
+        const summarizeBtnText = document.getElementById('summarize-btn-text');
+        const summarizeLoader = document.getElementById('summarize-loader');
+        const summarizerOutput = document.getElementById('summarizer-output');
+
+        // --- Speech-to-Text (STT) Logic ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isRecording = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                micBtn.classList.add('recording');
+                sttStatus.textContent = 'กำลังฟัง...';
+            };
+
+            recognition.onend = () => {
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                sttStatus.textContent = sttOutput.value ? 'กดปุ่มเพื่อพูดต่อ' : 'กดปุ่มเพื่อเริ่มพูด';
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech Recognition Error", event.error);
+                sttStatus.textContent = `Error: ${event.error}`;
+            };
+
+            let finalTranscript = '';
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                sttOutput.value = finalTranscript + interimTranscript;
+                if(finalTranscript.length > 0) {
+                    sendToSummarizerBtn.disabled = false;
+                    sendToSummarizerBtn.classList.remove('bg-gray-600');
+                    sendToSummarizerBtn.classList.add('bg-accent-color', 'text-[#000033]', 'font-semibold');
+                }
+            };
+
+            micBtn.onclick = () => {
+                if (isRecording) {
+                    recognition.stop();
+                } else {
+                    finalTranscript = sttOutput.value; // Allow appending
+                    recognition.lang = sttLangSelect.value;
+                    recognition.start();
+                }
+            };
+
+        } else {
+            sttStatus.textContent = "เบราว์เซอร์ของคุณไม่รองรับ Speech Recognition";
+            micBtn.disabled = true;
+        }
+
+        // --- Send to Summarizer Logic ---
+        sendToSummarizerBtn.onclick = () => {
+            if (sttOutput.value) {
+                summarizerInput.value = sttOutput.value;
+                summarizerInput.focus();
+            }
+        };
+
+        // --- Text-to-Speech (TTS) Logic ---
+        const synth = window.speechSynthesis;
+        speakBtn.onclick = () => {
+            if (ttsInput.value !== '') {
+                const utterance = new SpeechSynthesisUtterance(ttsInput.value);
+                utterance.lang = ttsLangSelect.value;
+                utterance.onerror = (event) => {
+                    console.error("Speech Synthesis Error", event.error);
+                };
+                synth.speak(utterance);
+            }
+        };
+
+        // --- AI Summarizer Logic ---
+        summarizeBtn.onclick = async () => {
+            const textToSummarize = summarizerInput.value;
+            if (!textToSummarize.trim()) {
+                alert('กรุณาป้อนข้อความสำหรับสรุป');
+                return;
+            }
+
+            // Show loading state
+            summarizeBtnText.classList.add('hidden');
+            summarizeLoader.classList.remove('hidden');
+            summarizeBtn.disabled = true;
+            summarizerOutput.innerHTML = '<p class="text-sm">กำลังวิเคราะห์...</p>';
+
+            try {
+                const response = await fetch('http://localhost:8000/summarize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: textToSummarize })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json(); // {"summary": ["...", "..."]}
+
+                // Display results
+                summarizerOutput.innerHTML = ''; // Clear previous results
+                if (data.summary && data.summary.length > 0) {
+                    data.summary.forEach(keyword => {
+                        const tag = document.createElement('span');
+                        tag.className = 'keyword-tag';
+                        tag.textContent = keyword;
+                        summarizerOutput.appendChild(tag);
+                    });
+                } else {
+                    summarizerOutput.innerHTML = '<p class="text-sm">ไม่พบคำสำคัญ</p>';
+                }
+
+            } catch (error) {
+                console.error('Error calling summarize API:', error);
+                summarizerOutput.innerHTML = `<p class="text-sm text-red-400">เกิดข้อผิดพลาด: ${error.message}</p>`;
+            } finally {
+                // Hide loading state
+                summarizeBtnText.classList.remove('hidden');
+                summarizeLoader.classList.add('hidden');
+                summarizeBtn.disabled = false;
+            }
+        };
+    });
+    </script>
+</body>
+</html>
