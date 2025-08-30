@@ -21,7 +21,7 @@
 ## 3. สถาปัตยกรรมและเทคโนโลยี (Architecture & Technology)
 เราใช้สถาปัตยกรรมคลาวด์ที่ทันสมัยและปลอดภัย (The Cloud Architect):
 * **Frontend:** แอปพลิเคชันที่พัฒนาด้วย Kotlin บน Android และ Wear OS.
-* **Backend (The Brain):** AI แปลภาษาแบบ Open Source (เช่น Whisper) ที่ติดตั้งและทำงานบน **AIS Edge Compute Server**.
+* **Backend (The Brain):** AI แปลภาษาแบบ Open Source ที่ติดตั้งและทำงานบน **AIS Edge Compute Server**.
 * **Network:** การส่งข้อมูลเสียงที่เข้ารหัสแล้วทั้งหมดจะวิ่งผ่าน **เครือข่าย AIS 5G**.
 
 ---
