@@ -34,7 +34,7 @@
 ---
 
 ## เพิ่มเติม
-mediapipe-samples: https://github.com/google-ai-edge/mediapipe-samples.git
-**nlp (thai): https://github.com/kobkrit/nlp_thai_resources.git
+*mediapipe-samples: https://github.com/google-ai-edge/mediapipe-samples.git
+*nlp (thai): https://github.com/kobkrit/nlp_thai_resources.git
 * `/android-app` - โครงสร้างโค้ดสำหรับแอปพลิเคชันบนสมาร์ทโฟน.
 * `/wear-os-app` - โครงสร้างโค้ดสำหรับแอปพลิเคชันบนนาฬิกา.
