@@ -1,4 +1,4 @@
-First you need to have a python and open The Terminail and run.
+First you need to have a python 3.8+ and open The Terminail and run.
 Step #1 -- Install python library
 
 pip install SpeechRecognition pyaudio
