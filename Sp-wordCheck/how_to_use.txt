@@ -1,0 +1,11 @@
+First you need to have a python and open The Terminail and run.
+Step #1 -- Install python library
+
+pip install SpeechRecognition pyaudio
+pip install SpeechRecognition
+
+**How to run it??**
+Use this code to run
+Step #2 --Run code
+
+python augmenter.py
