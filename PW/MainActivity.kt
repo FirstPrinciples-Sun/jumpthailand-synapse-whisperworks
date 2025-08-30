@@ -15,7 +15,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Settings
@@ -72,7 +74,7 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             WhisperWorksTheme {
-                AudioCaptureScreen(viewModel = viewModel)
+                AudioCaptureScreenV2(viewModel = viewModel)
             }
         }
     }
@@ -515,5 +517,180 @@ private fun getStatusText(recordingState: RecordingState, networkProgress: Netwo
         recordingState == RecordingState.COMPLETED -> "Recording Complete"
         recordingState == RecordingState.ERROR -> "Recording Error"
         else -> "Ready to Record"
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val sharedPreferences = remember {
+        context.getSharedPreferences("whisper_works_prefs", Context.MODE_PRIVATE)
+    }
+    var serverIp by remember {
+        mutableStateOf(sharedPreferences.getString("server_ip", "http://192.168.1.100:8000") ?: "")
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Settings") },
+                navigationIcon = {
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Enter the IP address of your WhisperWorks backend server. It should include the protocol and port (e.g., http://192.168.1.10:8000).",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+
+            OutlinedTextField(
+                value = serverIp,
+                onValueChange = { serverIp = it },
+                label = { Text("Server IP Address") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Button(
+                onClick = {
+                    sharedPreferences.edit().putString("server_ip", serverIp.trim()).apply()
+                    onDismiss()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Save")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AudioCaptureScreenV2(
+    viewModel: MainViewModel,
+    modifier: Modifier = Modifier
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var showSettingsScreen by remember { mutableStateOf(false) }
+
+    if (showSettingsScreen) {
+        SettingsScreen(onDismiss = { showSettingsScreen = false })
+        return
+    }
+
+    // Show permission dialog if needed
+    if (uiState.showPermissionDialog) {
+        PermissionDialog(
+            onRequestPermission = {
+                ActivityCompat.requestPermissions(
+                    context as ComponentActivity,
+                    arrayOf(Manifest.permission.RECORD_AUDIO),
+                    0
+                )
+            },
+            onDismiss = { viewModel.dismissPermissionDialog() }
+        )
+    }
+
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "WhisperWorks",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                actions = {
+                    IconButton(onClick = { showSettingsScreen = true }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            )
+        }
+    ) { innerPadding ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            // Status Card
+            StatusCard(
+                recordingState = uiState.recordingState,
+                audioLevel = uiState.audioLevel,
+                networkProgress = uiState.networkProgress,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Transcription Result
+            TranscriptionResultCard(
+                transcriptionResult = uiState.transcriptionResult,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Audio Level Indicator
+            if (uiState.recordingState == RecordingState.RECORDING) {
+                AudioLevelIndicator(
+                    level = uiState.audioLevel,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+
+            // Record Button
+            RecordButton(
+                recordingState = uiState.recordingState,
+                isEnabled = uiState.isRecordButtonEnabled,
+                onStartRecording = {
+                    coroutineScope.launch {
+                        viewModel.startRecording()
+                    }
+                },
+                onStopRecording = {
+                    coroutineScope.launch {
+                        viewModel.stopRecording()
+                    }
+                },
+                modifier = Modifier.size(80.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Connection Status
+            ConnectionStatusCard(
+                isConnected = uiState.isWearableConnected,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
