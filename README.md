@@ -36,4 +36,5 @@
 ## เพิ่มเติม
 * mediapipe-samples: https://github.com/google-ai-edge/mediapipe-samples.git
 * nlp (thai): https://github.com/kobkrit/nlp_thai_resources.git
+* ไฟล์โครงร่าง Project อยู่ใน PW_MODIFIED
 
