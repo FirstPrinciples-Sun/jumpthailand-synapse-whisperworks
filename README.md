@@ -38,3 +38,5 @@ Repository นี้คือศูนย์กลางการพัฒนา
 
 * `/android-app` - โครงสร้างโค้ดสำหรับแอปพลิเคชันบนสมาร์ทโฟน.
 * `/wear-os-app` - โครงสร้างโค้ดสำหรับแอปพลิเคชันบนนาฬิกา.
+## เพิ่มเติม
+mediapipe-samples: https://github.com/google-ai-edge/mediapipe-samples.git
